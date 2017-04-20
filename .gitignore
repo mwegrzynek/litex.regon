@@ -1,0 +1,10 @@
+.project
+.pydevproject
+.settings
+*.pyc
+*.mo
+.DS_Store
+build
+dist
+*.egg-info
+run_test*
