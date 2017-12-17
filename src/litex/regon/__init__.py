@@ -225,6 +225,11 @@ class REGONAPI(object):
                 correct_report_name = detailed_report_names_map.get(
                     str(rs.SilosID)
                 )
+                if rs.Typ == 'LP':
+                    correct_report_name = 'PublDaneRaportLokalnaPrawnej'
+                elif rs.Typ == 'LF':
+                    correct_report_name = 'PublDaneRaportLokalnaFizycznej'
+
                 rs.detailed = self.full_report(
                     correct_regon,
                     correct_report_name
