@@ -11,6 +11,7 @@ Created on 17 lip 2015
 from __future__ import unicode_literals
 import logging
 import email
+import sys
 
 
 import requests
@@ -27,6 +28,7 @@ from .envelopes import (
 )
 
 
+py3 = sys.version_info >= (3,)
 log = logging.getLogger(__name__)
 
 
@@ -42,6 +44,12 @@ detailed_report_names_map = {
     '2': 'PublDaneRaportDzialalnoscFizycznejRolnicza',
     '3': 'PublDaneRaportDzialalnoscFizycznejPozostala',
     '4': 'PublDaneRaportDzialalnoscFizycznejWKrupgn'
+}
+
+extended_report_names_map = {
+    'LP': 'PublDaneRaportLokalnaPrawnej',
+    'LF': 'PublDaneRaportLokalnaFizycznej',
+    'F': 'PublDaneRaportFizycznaOsoba'
 }
 
 
@@ -79,6 +87,9 @@ class REGONAPI(object):
             '{0}: {1}'.format(key, val) for key, val in res.headers.items()
         )
         mimemsg += '\r\n' + res.text
+
+        if not py3:
+            mimemsg = mimemsg.encode('UTF-8')
 
         mesg = email.message_from_string(mimemsg)
         assert mesg.is_multipart, 'Response is not multipart.'
@@ -225,24 +236,21 @@ class REGONAPI(object):
                 correct_report_name = detailed_report_names_map.get(
                     str(rs.SilosID)
                 )
-                if rs.Typ == 'LP':
-                    correct_report_name = 'PublDaneRaportLokalnaPrawnej'
-                elif rs.Typ == 'LF':
-                    correct_report_name = 'PublDaneRaportLokalnaFizycznej'
 
                 rs.detailed = self.full_report(
                     correct_regon,
                     correct_report_name
                 )
 
-                if rs.Typ == 'F':
-                    # Data from sole proprietorhsips has to be extended
-                    # by an additional report
-                    sp_data = self.full_report(
+                # Some types of organisations have addidtional detailed
+                # reports
+                extended_report_name = extended_report_names_map.get(rs.Typ)
+                if extended_report_name:
+                    add_data = self.full_report(
                         correct_regon,
-                        'PublDaneRaportFizycznaOsoba'
+                        extended_report_name
                     )
-                    rs.detailed.extend(sp_data.getchildren())
+                    rs.detailed.extend(add_data.getchildren())
 
                 detailed_data.append(rs)
 
