@@ -8,46 +8,61 @@ Regon_Bir@stat.gov.pl.
 
 Usage example below:
 
+```python
 >>> from litex.regon import REGONAPI
+```
 
 REGONAPI accepts one argument: service URL (provided by REGON Administrators).
 
+```python
 >>> api = REGONAPI(SERVICE_URL)
+```
 
 First, one needs to log in (using provided user key)
 
+```python
 >>> api.login(USER_KEY)
+```
 
 After login, one can start querying the database. The search method
 accepts the following parameters:
 
- - regon - single REGON number (either 9 or 14 digits long)
- - krs - single 10 digit KRS number
- - nip - single NIP (10 digits string)
- - regons - a collection of REGONs (all of them have to be either 14 or 9 digits long)
- - krss - a collection of KRSs
- - nips - a collection of NIPs
+ - `regon` - single REGON number (either 9 or 14 digits long)
+ - `krs` - single 10 digit KRS number
+ - `nip` - single NIP (10 digits string)
+ - `regons` - a collection of REGONs (all of them have to be either 14 or 9 digits long)
+ - `krss` - a collection of KRSs
+ - `nips` - a collection of NIPs
 
 Only one parameter is used in the query. If multiple ones are passed, first
 from the above list is taken into account.
 
-Additionaly, a 'detailed' parameter can be passed: detailed=True causes search method to
+Additionally, a `detailed` parameter can be passed: `detailed=True` causes search method to
 fetch default detailed report.
 
+```python
 >>> entities = api.search(nip='9999999999')
+```
 
-entities is a list of LXML objectify objects wrapping the search results (up to 100).
-If search was called with detailed=True, the full report is available as the 'detailed' attribute.
+`entities` is a list of LXML objectify objects wrapping the search results (up to 100).
+If search was called with `detailed=True`, the full report is available as the `detailed` attribute.
 
 If one knows the REGON of a business entity and an detailed report name, a full report can be fetched
 directly:
 
+```python
 >>> detailed_report = api.full_report('99999999', 'PublDaneRaportFizycznaOsoba')
+```
 
 Report names can be found in the documentation provided by REGON admins.
 
 Changes
 =======
+1.0.4
+-----
+ - migration from nose to py.test
+ - tox configuration for Python 2 and 3 testing
+ - improved handling of detailed reports (thanks to @miloszsobiczewski for logging an issue)
 
 1.0.3
 -----

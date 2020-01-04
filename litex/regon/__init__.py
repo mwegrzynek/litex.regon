@@ -8,10 +8,11 @@ Created on 17 lip 2015
 
 @author: Michał Węgrzynek
 '''
-from __future__ import unicode_literals
+from __future__ import unicode_literals, print_function
 import logging
 import email
 import sys
+import warnings
 
 
 import requests
@@ -130,8 +131,14 @@ class REGONAPI(object):
     def get_captcha(self):
         '''
         Gets CAPTCHA for human verification;
-        Returns decoded image data or false, if showing CAPTCHA is not needed
+        Returns decoded image data or false, if showing CAPTCHA is not needed.
+        Deprecated.
         '''
+        warnings.warn(
+            'No longer needed.',
+            DeprecationWarning
+        )
+
         mesg = self.call(GET_CAPTCHA_ENVELOPE)
         result = get_message_element(
             mesg,
@@ -148,6 +155,11 @@ class REGONAPI(object):
         '''
         Sends the human recognized CAPTCHA string for verification
         '''
+        warnings.warn(
+            'No longer needed.',
+            DeprecationWarning
+        )
+
         mesg = self.call(CHECK_CAPTCHA_ENVELOPE, captcha=captcha)
         result = get_message_element(
             mesg,
@@ -242,7 +254,7 @@ class REGONAPI(object):
                     correct_report_name
                 )
 
-                # Some types of organisations have addidtional detailed
+                # Some types of organizations have additional detailed
                 # reports
                 extended_report_name = extended_report_names_map.get(rs.Typ)
                 if extended_report_name:
@@ -257,20 +269,24 @@ class REGONAPI(object):
             return detailed_data
 
     def full_report(self, regon, report_name):
-        mesg = self.call(
-            FULL_REPORT_ENVELOPE,
-            regon=regon,
-            report_name=report_name
-        )
-        result = objectify.fromstring(
-            get_message_element(
-                mesg,
-                0,
-                '//bir:DanePobierzPelnyRaportResult/text()'
-            )[0]
+        result = None
+
+        mesg = get_message_element(
+            self.call(
+                FULL_REPORT_ENVELOPE,
+                regon=regon,
+                report_name=report_name
+            ),
+            0,
+            '//bir:DanePobierzPelnyRaportResult/text()'
         )
 
-        if not len(result):
-            raise REGONAPIError('Getting full report failed.')
+        if mesg:
+            result = objectify.fromstring(
+                mesg[0]
+            )
+            result = result[0].dane
+        else:
+            result = objectify.Element("detailed")
 
-        return result[0].dane
+        return result
