@@ -7,8 +7,7 @@
 build
 dist
 *.egg-info
-run_test
 .vscode
 .tox
 .pycache
-runtests
+run_tests
