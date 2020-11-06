@@ -109,8 +109,8 @@ def test_search_corporation_detailed(li_api):
 def test_search_multiple_nips(li_api):
     result = li_api.search(nips=[TEST_NIP_CP, TEST_NIP_SP])
     assert len(result) >= 2
-    assert result[-1].Regon == TEST_REGON_CP
-    assert result[0].Regon == TEST_REGON_SP
+    assert result[0].Regon == TEST_REGON_CP
+    assert result[1].Regon == TEST_REGON_SP
     li_api.logout()
 
 

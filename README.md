@@ -58,6 +58,13 @@ Report names can be found in the documentation provided by REGON admins.
 
 Changes
 =======
+1.0.5
+-----
+ - reworked REGON cleanup logic (in search function, when fetching detailed report)
+ - search method now uses DaneSzukajPodmioty (API version 1.1) call instead of DaneSzukaj
+   (thanks to @kicaj for pull request)
+
+
 1.0.4
 -----
  - migration from nose to py.test

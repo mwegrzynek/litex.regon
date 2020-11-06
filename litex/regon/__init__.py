@@ -241,9 +241,18 @@ class REGONAPI(object):
             detailed_data = []
             for rs in search_results:
 
-                # Sometimes the leading zeros get lost
-                correct_regon = '{0:014}'.format(int(rs.Regon)) \
-                    if len(str(rs.Regon)) not in (9, 14) else rs.Regon
+                # Sometimes the leading zeros get lost                
+                regon_str = str(rs.Regon)
+                regon_len = len(regon_str)
+                
+                if regon_len in (9, 14):
+                    correct_regon = regon_str
+                elif regon_len < 9:
+                    correct_regon = '{0:09}'.format(int(regon_str))
+                elif regon_len < 14:
+                    correct_regon = '{0:014}'.format(int(regon_str))                
+                else:
+                    correct_regon = regon_str
 
                 correct_report_name = detailed_report_names_map.get(
                     str(rs.SilosID)
