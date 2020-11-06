@@ -229,7 +229,7 @@ class REGONAPI(object):
                 )
 
         mesg = self.call(SEARCH_ENVELOPE, param=param)
-        result = get_message_element(mesg, 0, '//bir:DaneSzukajResult/text()')
+        result = get_message_element(mesg, 0, '//bir:DaneSzukajPodmiotyResult/text()')
         if not result:
             raise REGONAPIError('Search failed.')
 
