@@ -90,3 +90,17 @@ FULL_REPORT_ENVELOPE = '''\
    </soap:Body>
 </soap:Envelope>
 '''
+
+GET_VALUE_ENVELOPE = '''\
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://CIS/BIR/2014/07">
+<soap:Header xmlns:wsa="http://www.w3.org/2005/08/addressing">
+<wsa:To>{api.service_url}</wsa:To>
+<wsa:Action>http://CIS/BIR/2014/07/IUslugaBIR/GetValue</wsa:Action>
+</soap:Header>
+  <soap:Body>
+    <ns:GetValue>
+      <ns:pNazwaParametru>{param}</ns:pNazwaParametru>
+    </ns:GetValue>
+  </soap:Body>
+</soap:Envelope>
+'''

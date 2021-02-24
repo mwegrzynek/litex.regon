@@ -130,3 +130,18 @@ def test_issue_3_charities(li_api):
         assert res.detailed.lokpraw_regon14 == res.Regon
 
     li_api.logout()
+
+
+def test_get_value(li_api):
+    assert li_api.get_value("KomunikatKod") == "0"
+    li_api.search(nip='wrong_nip')
+    assert li_api.get_value("KomunikatKod") == "4"
+    li_api.logout()
+
+
+def test_exception_message(li_api):
+    li_api.logout()
+    with pytest.raises(REGONAPIError) as e_info:
+        li_api.search(nip=TEST_NIP_SP)
+    assert e_info.value.args[0] == REGONAPIError.get_message_by_code('')
+    li_api.logout()

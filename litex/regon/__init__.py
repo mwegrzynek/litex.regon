@@ -25,7 +25,8 @@ from .envelopes import (
     SEARCH_ENVELOPE,
     FULL_REPORT_ENVELOPE,
     GET_CAPTCHA_ENVELOPE,
-    CHECK_CAPTCHA_ENVELOPE
+    CHECK_CAPTCHA_ENVELOPE,
+    GET_VALUE_ENVELOPE
 )
 
 
@@ -60,7 +61,21 @@ def get_message_element(message, payload_num, path):
 
 
 class REGONAPIError(RuntimeError):
-    pass
+    error_message_map = {
+        '': ('No session. Session expired or wrong value was passed to sid '
+             'header.'),
+        '0': 'Previous operation completed succesfully.',
+        '2': 'Too many indentifiers passsed to method DaneSzukajPodmioty.',
+        '4': 'Entity not found.',
+        '5': 'Incorrect or empty report name.',
+        '7': ('No session. Session expired or wrong value was passed to sid '
+              'header.')
+    }
+
+    @staticmethod
+    def get_message_by_code(code):
+        message = REGONAPIError.error_message_map[code]
+        return f"Error code: {code}. {message}"
 
 
 class REGONAPI(object):
@@ -231,7 +246,9 @@ class REGONAPI(object):
         mesg = self.call(SEARCH_ENVELOPE, param=param)
         result = get_message_element(mesg, 0, '//bir:DaneSzukajPodmiotyResult/text()')
         if not result:
-            raise REGONAPIError('Search failed.')
+            code = self.get_value("KomunikatKod")
+            error_message = REGONAPIError.get_message_by_code(code)
+            raise REGONAPIError(error_message)
 
         search_results = list(objectify.fromstring(result[0]).dane)
 
@@ -297,5 +314,24 @@ class REGONAPI(object):
             result = result[0].dane
         else:
             result = objectify.Element("detailed")
+
+        return result
+
+    def get_value(self, param):
+        result = None
+
+        mesg = get_message_element(
+            self.call(
+                GET_VALUE_ENVELOPE,
+                param=param
+            ),
+            0,
+            '//pb:GetValueResult/text()'
+        )
+
+        try:
+            result = mesg[0]
+        except IndexError:
+            result = ''
 
         return result
