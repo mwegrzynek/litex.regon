@@ -91,6 +91,21 @@ FULL_REPORT_ENVELOPE = '''\
 </soap:Envelope>
 '''
 
+SUMMARY_REPORT_ENVELOPE = '''\
+<soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://CIS/BIR/PUBL/2014/07">
+<soap:Header xmlns:wsa="http://www.w3.org/2005/08/addressing">
+<wsa:Action>http://CIS/BIR/PUBL/2014/07/IUslugaBIRzewnPubl/DanePobierzRaportZbiorczy</wsa:Action>
+<wsa:To>{api.service_url}</wsa:To>
+</soap:Header>
+  <soap:Body>
+    <ns:DanePobierzRaportZbiorczy>
+      <ns:pDataRaportu>{date}</ns:pDataRaportu>
+      <ns:pNazwaRaportu>{report_name}</ns:pNazwaRaportu>
+    </ns:DanePobierzRaportZbiorczy>
+  </soap:Body>
+</soap:Envelope>
+'''
+
 GET_VALUE_ENVELOPE = '''\
 <soap:Envelope xmlns:soap="http://www.w3.org/2003/05/soap-envelope" xmlns:ns="http://CIS/BIR/2014/07">
 <soap:Header xmlns:wsa="http://www.w3.org/2005/08/addressing">

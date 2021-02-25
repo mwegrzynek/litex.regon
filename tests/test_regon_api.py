@@ -7,6 +7,7 @@ Created on 17 lip 2015
 @author: Michał Wegrzynek <mwegrzynek@litex.pl>
 '''
 from __future__ import unicode_literals
+import datetime
 import os
 import sys
 
@@ -145,3 +146,11 @@ def test_exception_message(li_api):
         li_api.search(nip=TEST_NIP_SP)
     assert e_info.value.args[0] == REGONAPIError.get_message_by_code('')
     li_api.logout()
+
+
+def test_summary_report(li_api):
+    yesterday = datetime.date.today() - datetime.timedelta(days=1)
+    date = yesterday.strftime("%Y-%m-%d")
+    summary_rep_name = 'BIR11NowePodmiotyPrawneOrazDzialalnosciOsFizycznych'
+    report = li_api.summary_report(date, summary_rep_name)
+    assert report[0].tag == 'dane'

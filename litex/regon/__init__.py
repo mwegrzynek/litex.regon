@@ -26,6 +26,7 @@ from .envelopes import (
     FULL_REPORT_ENVELOPE,
     GET_CAPTCHA_ENVELOPE,
     CHECK_CAPTCHA_ENVELOPE,
+    SUMMARY_REPORT_ENVELOPE,
     GET_VALUE_ENVELOPE
 )
 
@@ -314,6 +315,27 @@ class REGONAPI(object):
             result = result[0].dane
         else:
             result = objectify.Element("detailed")
+
+        return result
+
+    def summary_report(self, date, report_name):
+        result = None
+
+        mesg = get_message_element(
+            self.call(
+                SUMMARY_REPORT_ENVELOPE,
+                date=date,
+                report_name=report_name
+            ),
+            0,
+            '//bir:DanePobierzRaportZbiorczyResult/text()'
+        )
+
+        if mesg:
+            result = objectify.fromstring(mesg[0])
+            result = [el for el in result.iter('dane')]
+        else:
+            result = objectify.Element("dane")
 
         return result
 
