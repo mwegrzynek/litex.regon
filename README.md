@@ -54,6 +54,16 @@ directly:
 >>> detailed_report = api.full_report('99999999', 'PublDaneRaportFizycznaOsoba')
 ```
 
+Summary report with a list of regons for the given criteria can be fetched by:
+
+```python
+>>> summary_report = api.summary_report(
+        '2020-01-01', 
+        'BIR11NowePodmiotyPrawneOrazDzialalnosciOsFizycznych'
+    )
+```
+
+
 Report names can be found in the documentation provided by REGON admins.
 
 Changes
