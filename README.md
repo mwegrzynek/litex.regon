@@ -54,7 +54,7 @@ directly:
 >>> detailed_report = api.full_report('99999999', 'PublDaneRaportFizycznaOsoba')
 ```
 
-Summary report with a list of regons for the given criteria can be fetched by:
+Summary report with a list of REGONs for the given criteria can be fetched by:
 
 ```python
 >>> summary_report = api.summary_report(
@@ -63,11 +63,17 @@ Summary report with a list of regons for the given criteria can be fetched by:
     )
 ```
 
-
 Report names can be found in the documentation provided by REGON admins.
 
 Changes
 =======
+1.0.6
+-----
+
+- more meaningful error messages in search method (thanks @m-ganko)
+- summary reports (also kudos to @m-ganko)
+
+
 1.0.5
 -----
  - reworked REGON cleanup logic (in search function, when fetching detailed report)

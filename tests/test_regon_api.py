@@ -57,11 +57,6 @@ def test_login_incorrect_user_key(api):
         api.login('dummykey')
 
 
-def test_logout_without_login(api):
-    with pytest.raises(REGONAPIError):
-        api.logout()
-
-
 def test_logout(api):
     api.login(USER_KEY)
     api.logout()
@@ -134,23 +129,40 @@ def test_issue_3_charities(li_api):
 
 
 def test_get_value(li_api):
-    assert li_api.get_value("KomunikatKod") == "0"
-    li_api.search(nip='wrong_nip')
-    assert li_api.get_value("KomunikatKod") == "4"
-    li_api.logout()
+    assert li_api.get_value('KomunikatKod') == '0'
+
+    try:
+        li_api.search(nip='wrong_nip')
+    except REGONAPIError:
+        pass
+
+    assert li_api.get_value('KomunikatKod') == '4'
 
 
-def test_exception_message(li_api):
-    li_api.logout()
+def test_no_session_exception_message(api):    
     with pytest.raises(REGONAPIError) as e_info:
-        li_api.search(nip=TEST_NIP_SP)
-    assert e_info.value.args[0] == REGONAPIError.get_message_by_code('')
+        api.search(nip=TEST_NIP_SP)
+
+    assert e_info.value.message == 'No response received. Are you logged in?'
+
+
+def test_entity_not_found_exception_message(li_api):    
+    with pytest.raises(REGONAPIError) as e_info:
+        res = li_api.search(nips=['7964627448', '1184627375'])
+
+    assert e_info.value.message == 'No data found for the specified search criteria.'
+    assert e_info.value.code == 4
     li_api.logout()
 
 
 def test_summary_report(li_api):
     yesterday = datetime.date.today() - datetime.timedelta(days=1)
-    date = yesterday.strftime("%Y-%m-%d")
+    
+    date = yesterday.strftime('%Y-%m-%d')
+    
     summary_rep_name = 'BIR11NowePodmiotyPrawneOrazDzialalnosciOsFizycznych'
     report = li_api.summary_report(date, summary_rep_name)
+    
     assert report[0].tag == 'dane'
+
+    li_api.logout()

@@ -62,21 +62,16 @@ def get_message_element(message, payload_num, path):
 
 
 class REGONAPIError(RuntimeError):
-    error_message_map = {
-        '': ('No session. Session expired or wrong value was passed to sid '
-             'header.'),
-        '0': 'Previous operation completed succesfully.',
-        '2': 'Too many indentifiers passsed to method DaneSzukajPodmioty.',
-        '4': 'Entity not found.',
-        '5': 'Incorrect or empty report name.',
-        '7': ('No session. Session expired or wrong value was passed to sid '
-              'header.')
-    }
 
-    @staticmethod
-    def get_message_by_code(code):
-        message = REGONAPIError.error_message_map[code]
-        return f"Error code: {code}. {message}"
+    def __init__(self, message, code=None, full_error_obj=None):
+        super(REGONAPIError, self).__init__(self, message, code, full_error_obj)
+        self.message = message
+        self.code = code
+    
+    def __str__(self):
+        return '<REGONAPIError [{}] {}>'.format(self.code, self.message)
+
+    __repr__ = __str__
 
 
 class REGONAPI(object):
@@ -87,7 +82,7 @@ class REGONAPI(object):
 
     def call(self, envelope, **args):
         '''
-        Calls an API's method (descibed by the envelope)
+        Calls an API's method (described by the envelope)
         '''
         data = envelope.format(api=self, **args)
         log.debug('Data to be posted: %s', data)
@@ -113,6 +108,25 @@ class REGONAPI(object):
 
         return mesg
 
+    def get_value(self, param):
+        result = None
+
+        mesg = get_message_element(
+            self.call(
+                GET_VALUE_ENVELOPE,
+                param=param
+            ),
+            0,
+            '//pb:GetValueResult/text()'
+        )
+
+        try:
+            result = mesg[0]
+        except IndexError:
+            result = ''
+
+        return result
+        
     def login(self, user_key):
         '''
         Logs in to the REGON API Service
@@ -246,12 +260,19 @@ class REGONAPI(object):
 
         mesg = self.call(SEARCH_ENVELOPE, param=param)
         result = get_message_element(mesg, 0, '//bir:DaneSzukajPodmiotyResult/text()')
+
         if not result:
-            code = self.get_value("KomunikatKod")
-            error_message = REGONAPIError.get_message_by_code(code)
-            raise REGONAPIError(error_message)
+            raise REGONAPIError('No response received. Are you logged in?')
 
         search_results = list(objectify.fromstring(result[0]).dane)
+
+        try:
+            sr = search_results[0]
+            code = sr.ErrorCode[0]
+            message = sr.ErrorMessageEn[0]
+            raise REGONAPIError(message, code, sr)
+        except AttributeError:
+            pass
 
         if not detailed:
             return search_results
@@ -335,25 +356,6 @@ class REGONAPI(object):
             result = objectify.fromstring(mesg[0])
             result = [el for el in result.iter('dane')]
         else:
-            result = objectify.Element("dane")
-
-        return result
-
-    def get_value(self, param):
-        result = None
-
-        mesg = get_message_element(
-            self.call(
-                GET_VALUE_ENVELOPE,
-                param=param
-            ),
-            0,
-            '//pb:GetValueResult/text()'
-        )
-
-        try:
-            result = mesg[0]
-        except IndexError:
-            result = ''
+            result = objectify.Element('dane')
 
         return result
