@@ -67,6 +67,11 @@ Report names can be found in the documentation provided by REGON admins.
 
 Changes
 =======
+1.0.7
+-----
+
+- compatibility with requests >= 2.28 (thanks to @wolkiewiczk for spotting this)
+
 1.0.6
 -----
 

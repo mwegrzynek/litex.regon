@@ -139,7 +139,7 @@ class REGONAPI(object):
             self.sid = None
             raise REGONAPIError('Login failed.')
 
-        self.sid = result[0]
+        self.sid = str(result[0])
 
         return self.sid
 
