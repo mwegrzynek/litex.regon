@@ -166,3 +166,12 @@ def test_summary_report(li_api):
     assert report[0].tag == 'dane'
 
     li_api.logout()
+
+
+def test_full_report_error_handling(li_api):
+    with pytest.raises(REGONAPIError) as excinfo:
+        li_api.full_report('wrong_regon', 'PublDaneRaportPrawna')
+
+    assert excinfo.value.code == 4
+
+    li_api.logout()

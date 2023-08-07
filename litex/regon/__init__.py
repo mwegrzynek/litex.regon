@@ -126,6 +126,17 @@ class REGONAPI(object):
             result = ''
 
         return result
+    
+    def raise_detailed_error(self):
+        '''
+        Raises a detailed based on the eresults from get_value method
+        '''
+        code = int(self.get_value('KomunikatKod'))
+        
+        if code != 0:
+            message = self.get_value('KomunikatTresc')
+
+            raise REGONAPIError(message, code)        
         
     def login(self, user_key):
         '''
@@ -297,10 +308,14 @@ class REGONAPI(object):
                     str(rs.SilosID)
                 )
 
-                rs.detailed = self.full_report(
-                    correct_regon,
-                    correct_report_name
-                )
+                try:
+                    rs.detailed = self.full_report(
+                        correct_regon,
+                        correct_report_name
+                    )
+                except REGONAPIError:
+                    # On error, return empty report
+                    rs.detailed = objectify.Element("detailed")
 
                 # Some types of organizations have additional detailed
                 # reports
@@ -328,14 +343,15 @@ class REGONAPI(object):
             0,
             '//bir:DanePobierzPelnyRaportResult/text()'
         )
-
+        
         if mesg:
             result = objectify.fromstring(
                 mesg[0]
             )
             result = result[0].dane
+            
         else:
-            result = objectify.Element("detailed")
+            self.raise_detailed_error()
 
         return result
 
@@ -356,6 +372,6 @@ class REGONAPI(object):
             result = objectify.fromstring(mesg[0])
             result = [el for el in result.iter('dane')]
         else:
-            result = objectify.Element('dane')
+            self.raise_detailed_error()
 
         return result

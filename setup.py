@@ -12,7 +12,7 @@ requires = [
     'lxml'
 ]
 
-version = '1.0.7'
+version = '1.0.8'
 
 setup(
     name='litex.regon',
