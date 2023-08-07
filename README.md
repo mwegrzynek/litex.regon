@@ -67,6 +67,13 @@ Report names can be found in the documentation provided by REGON admins.
 
 Changes
 =======
+
+1.0.8
+-----
+
+- full_report and summary_report now raise REGONAPIError on empty result with detailed error information
+  (thanks to @wolkiewiczk for suggestion)
+
 1.0.7
 -----
 
