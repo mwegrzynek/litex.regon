@@ -25,11 +25,13 @@ py3 = sys.version_info >= (3,)
 USER_KEY = os.environ.get('LR_USER_KEY')
 SERVICE_URL = os.environ.get('LR_SERVICE_URL')
 TEST_NIP_SP = os.environ.get('LR_TEST_NIP_SP')
-TEST_REGON_SP = int(os.environ.get('LR_TEST_REGON_SP'))
+TEST_REGON_SP = os.environ.get('LR_TEST_REGON_SP')
 TEST_NAME_SP = os.environ.get('LR_TEST_NAME_SP')
+TEST_PKD_SP = os.environ.get('LR_TEST_PKD_SP')
 TEST_NIP_CP = os.environ.get('LR_TEST_NIP_CP')
-TEST_REGON_CP = int(os.environ.get('LR_TEST_REGON_CP'))
+TEST_REGON_CP = os.environ.get('LR_TEST_REGON_CP')
 TEST_NAME_CP = os.environ.get('LR_TEST_NAME_CP')
+TEST_PKD_CP = os.environ.get('LR_TEST_PKD_CP')
 if not py3:
     TEST_NAME_SP = unicode(TEST_NAME_SP, 'UTF-8')
     TEST_NAME_CP = unicode(TEST_NAME_CP, 'UTF-8')
@@ -69,14 +71,14 @@ def test_search_no_params(li_api):
 
 def test_search_sole_proprietorship(li_api):
     result = li_api.search(nip=TEST_NIP_SP)
-    assert result[0].Regon == TEST_REGON_SP
+    assert result[0].Regon == int(TEST_REGON_SP)
     assert result[0].Nazwa == TEST_NAME_SP
     li_api.logout()
 
 
 def test_search_sole_proprietorship_detailed(li_api):
     result = li_api.search(nip=TEST_NIP_SP, detailed=True)[0]
-    assert result[0].Regon == TEST_REGON_SP
+    assert result[0].Regon == int(TEST_REGON_SP)
     assert str(result[0].detailed.fiz_nip) == TEST_NIP_SP
     assert getattr(
         result.detailed,
@@ -87,14 +89,14 @@ def test_search_sole_proprietorship_detailed(li_api):
 
 def test_search_corporation(li_api):
     result = li_api.search(nip=TEST_NIP_CP)
-    assert result[0].Regon == TEST_REGON_CP
+    assert result[0].Regon == int(TEST_REGON_CP)
     assert result[0].Nazwa == TEST_NAME_CP
     li_api.logout()
 
 
 def test_search_corporation_detailed(li_api):
     result = li_api.search(nip=TEST_NIP_CP, detailed=True)[0]
-    assert result.Regon == TEST_REGON_CP
+    assert result.Regon == int(TEST_REGON_CP)
     assert getattr(
         result.detailed,
         'praw_adSiedzNumerNieruchomosci'
@@ -105,8 +107,8 @@ def test_search_corporation_detailed(li_api):
 def test_search_multiple_nips(li_api):
     result = li_api.search(nips=[TEST_NIP_CP, TEST_NIP_SP])
     assert len(result) >= 2
-    assert result[0].Regon == TEST_REGON_CP
-    assert result[1].Regon == TEST_REGON_SP
+    assert result[0].Regon == int(TEST_REGON_CP)
+    assert result[1].Regon == int(TEST_REGON_SP)
     li_api.logout()
 
 
@@ -173,5 +175,41 @@ def test_full_report_error_handling(li_api):
         li_api.full_report('wrong_regon', 'PublDaneRaportPrawna')
 
     assert excinfo.value.code == 4
+
+    li_api.logout()
+
+def test_full_report_sole_proprietorship_pkd(li_api):
+    report_name = 'BIR11OsFizycznaPkd'
+    result = li_api.full_report(TEST_REGON_SP, report_name)
+
+    assert result is not None
+    assert hasattr(result[0], 'fiz_pkd_Kod')
+    assert hasattr(result[0], 'fiz_pkd_Nazwa')
+
+    main_pkd = next(filter(lambda x: getattr(x, 'fiz_pkd_Przewazajace', 0) == 1, result), None)
+    assert main_pkd is not None, 'No PKD record with fiz_pkd_Przewazajace = 1 found'
+
+    pkd_code = getattr(main_pkd, 'fiz_pkd_Kod', None)
+    assert pkd_code is not None, 'Missing fiz_pkd_Kod for main PKD entry'
+
+    assert pkd_code == TEST_PKD_SP, 'Main PKD code does not match expected value'
+
+    li_api.logout()
+
+def test_full_report_corporation_pkd(li_api):
+    report_name = 'BIR11OsPrawnaPkd'
+    result = li_api.full_report(TEST_REGON_CP, report_name)
+
+    assert result is not None
+    assert hasattr(result[0], 'praw_pkdKod')
+    assert hasattr(result[0], 'praw_pkdNazwa')
+
+    main_pkd = next(filter(lambda x: getattr(x, 'praw_pkdPrzewazajace', 0) == 1, result), None)
+    assert main_pkd is not None, 'No PKD record with praw_pkdPrzewazajace = 1 found'
+
+    pkd_code = getattr(main_pkd, 'praw_pkdKod', None)
+    assert pkd_code is not None, 'Missing praw_pkdKod for main PKD entry'
+
+    assert pkd_code == TEST_PKD_CP, 'Main PKD code does not match expected value'
 
     li_api.logout()

@@ -343,13 +343,19 @@ class REGONAPI(object):
             0,
             '//bir:DanePobierzPelnyRaportResult/text()'
         )
-        
+
         if mesg:
             result = objectify.fromstring(
                 mesg[0]
             )
-            result = result[0].dane
-            
+            dane_elements = result.findall('.//dane')
+
+            if len(dane_elements) > 1:
+                result = dane_elements
+            elif dane_elements:
+                result = dane_elements[0]
+            else:
+                self.raise_detailed_error()
         else:
             self.raise_detailed_error()
 

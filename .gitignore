@@ -12,3 +12,4 @@ dist
 .pycache
 run_tests
 .venv
+.idea/
