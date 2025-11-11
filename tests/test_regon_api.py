@@ -25,11 +25,11 @@ py3 = sys.version_info >= (3,)
 USER_KEY = os.environ.get('LR_USER_KEY')
 SERVICE_URL = os.environ.get('LR_SERVICE_URL')
 TEST_NIP_SP = os.environ.get('LR_TEST_NIP_SP')
-TEST_REGON_SP = int(os.environ.get('LR_TEST_REGON_SP'))
+TEST_REGON_SP = os.environ.get('LR_TEST_REGON_SP')
 TEST_NAME_SP = os.environ.get('LR_TEST_NAME_SP')
 TEST_PKD_SP = os.environ.get('LR_TEST_PKD_SP')
 TEST_NIP_CP = os.environ.get('LR_TEST_NIP_CP')
-TEST_REGON_CP = int(os.environ.get('LR_TEST_REGON_CP'))
+TEST_REGON_CP = os.environ.get('LR_TEST_REGON_CP')
 TEST_NAME_CP = os.environ.get('LR_TEST_NAME_CP')
 TEST_PKD_CP = os.environ.get('LR_TEST_PKD_CP')
 if not py3:
@@ -71,14 +71,14 @@ def test_search_no_params(li_api):
 
 def test_search_sole_proprietorship(li_api):
     result = li_api.search(nip=TEST_NIP_SP)
-    assert result[0].Regon == TEST_REGON_SP
+    assert result[0].Regon == int(TEST_REGON_SP)
     assert result[0].Nazwa == TEST_NAME_SP
     li_api.logout()
 
 
 def test_search_sole_proprietorship_detailed(li_api):
     result = li_api.search(nip=TEST_NIP_SP, detailed=True)[0]
-    assert result[0].Regon == TEST_REGON_SP
+    assert result[0].Regon == int(TEST_REGON_SP)
     assert str(result[0].detailed.fiz_nip) == TEST_NIP_SP
     assert getattr(
         result.detailed,
@@ -89,14 +89,14 @@ def test_search_sole_proprietorship_detailed(li_api):
 
 def test_search_corporation(li_api):
     result = li_api.search(nip=TEST_NIP_CP)
-    assert result[0].Regon == TEST_REGON_CP
+    assert result[0].Regon == int(TEST_REGON_CP)
     assert result[0].Nazwa == TEST_NAME_CP
     li_api.logout()
 
 
 def test_search_corporation_detailed(li_api):
     result = li_api.search(nip=TEST_NIP_CP, detailed=True)[0]
-    assert result.Regon == TEST_REGON_CP
+    assert result.Regon == int(TEST_REGON_CP)
     assert getattr(
         result.detailed,
         'praw_adSiedzNumerNieruchomosci'
@@ -107,8 +107,8 @@ def test_search_corporation_detailed(li_api):
 def test_search_multiple_nips(li_api):
     result = li_api.search(nips=[TEST_NIP_CP, TEST_NIP_SP])
     assert len(result) >= 2
-    assert result[0].Regon == TEST_REGON_CP
-    assert result[1].Regon == TEST_REGON_SP
+    assert result[0].Regon == int(TEST_REGON_CP)
+    assert result[1].Regon == int(TEST_REGON_SP)
     li_api.logout()
 
 
