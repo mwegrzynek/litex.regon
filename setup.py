@@ -1,7 +1,7 @@
 # -*- encoding: UTF-8 -*-
 import os
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_namespace_packages
 
 here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.md')).read()
@@ -12,7 +12,7 @@ requires = [
     'lxml'
 ]
 
-version = '1.0.8'
+version = '1.0.9'
 
 setup(
     name='litex.regon',
@@ -30,8 +30,7 @@ setup(
     license='GPL',
     keywords='regon soap database',
     package_dir={'': '.'},
-    namespace_packages=['litex'],
-    packages=find_packages('.'),
+    packages=find_namespace_packages(include=['litex', 'litex.*']),
     include_package_data=True,
     zip_safe=False,
     install_requires=requires,
