@@ -68,8 +68,8 @@ Report names can be found in the documentation provided by REGON admins.
 Changes
 =======
 
-1.0.9
------
+1.0.10
+------
 
 - namespace fix (only relevant for Litex Service's internal code).
 
